@@ -11,11 +11,20 @@
           @apply mx-auto hover:cursor-pointer;
         }
         input[type="checkbox"] { @apply invisible w-0 m-0 p-0; }
-        input[type="checkbox"]+span {
-          @apply border border-stone-50 bg-stone-50 px-4 py-3 rounded font-normal text-base w-fit flex items-center;
+        /* 將原先的選擇器修改為自訂的class，將要修改的樣式製作為另一個組件 */
+        .unchecked-column {
+          @apply border px-4 py-3 rounded font-normal text-base w-fit flex items-center border-stone-50 bg-stone-50;
         }
-        input[type="checkbox"]+span > i {
-          @apply border border-stone-200 bg-white rounded text-white mr-2;
+        .checked-column {
+          @apply border px-4 py-3 rounded font-normal text-base w-fit flex items-center border-blue-700;
+        }
+        .unchecked {
+          @apply border bg-white rounded mr-2 border-stone-200 text-white;
+          width: 17.5px;
+          height: 17.5px;
+        }
+        .checked {
+          @apply rounded mr-2 text-blue-700;
           width: 17.5px;
           height: 17.5px;
         }
@@ -23,11 +32,16 @@
           @apply border-0 border-b-2 p-0 w-1/4 items-center justify-center text-sm font-bold shadow text-white rounded;
           height: 44px;
         }
+        /* 新增hover顏色 hover:bg-slate-700 */
         .btn-enabled {
-          @apply text-white border border-slate-300 bg-slate-500;
+          @apply text-white border border-slate-300 bg-slate-500 hover:bg-slate-700;
         }
         .btn-disabled {
-          @apply text-stone-500 border border-stone-200 bg-stone-50 shadow-none;
+          @apply text-stone-500 border border-stone-200 bg-stone-50 shadow-none ;
+        }
+        /* 依尺寸改字體大小 640px媒體斷點*/
+        .check-text {
+          @apply text-sm sm:text-xl
         }
       }
     </style>
@@ -35,20 +49,49 @@
   <body>
     <div class="flex flex-col items-centerm mt-12">
       <label class="confirmed-checkbox" for="confirmed_checkbox">
-        <input type="checkbox" name="confirmed_checkbox" id="confirmed_checkbox" value="1">
-        <span>
-          <i class="fas fa-check-square"></i>
-          <div class="ml-2">confirm</div>
+        <input type="checkbox" name="confirmed_checkbox" id="confirmed_checkbox" value=false>
+        <span class="check-box unchecked-column">
+          <i class="fas fa-check-square unchecked"></i>
+          <div class="ml-2 check-text">confirm</div>
         </span>
       </label>
+      <p class="text-red-600 m-auto error-message">check checkbox</p>
     </div>
-    <button class="mx-auto flex btn btn-disabled mt-8" id="confirm_btn">create</button>
+    <!-- disable使unconfirm無法被點擊 -->
+    <button class="mx-auto flex btn btn-disabled mt-8 " id="confirm_btn" disabled>create</button>
 
     <script>
-      document.getElementById("confirm_btn").addEventListener("click", function() {
+      const confirmBtn = document.querySelector('#confirm_btn')
+      const checkBox = document.querySelector(".check-box")
+      const checkSquare = document.querySelector(".fa-check-square")
+      const confirmedCheckbox = document.querySelector("#confirmed_checkbox")
+      const errorMessage = document.querySelector('.error-message')
+      let state = {confirm: false}
+      
+      confirmBtn.addEventListener("click", function() {
         alert("welcome to fandnext");
       })
+
+      checkBox.addEventListener("click", (e) => {
+        if(state.confirm){
+          errorMessage.innerText = 'check checkbox'
+          checkSquare.classList.replace('checked', 'unchecked')
+          checkBox.classList.replace('checked-column', 'unchecked-column')
+          confirmBtn.classList.replace('btn-enabled', 'btn-disabled')
+          confirmBtn.disabled = true
+        }else{
+          errorMessage.innerText = ''
+          checkSquare.classList.replace('unchecked', 'checked')
+          checkBox.classList.replace('unchecked-column', 'checked-column')
+          confirmBtn.classList.replace('btn-disabled', 'btn-enabled')
+          confirmBtn.disabled = false
+        }
+        state.confirm = !state.confirm
+      }
+      )      
     </script>
   </body>
 </html>
+<!-- 這題遇到的問題是tailwind 原先@apply 製作的組件無法透過classList的方式做修改，因為優先級的關係，之後加上去屬性無法覆蓋，所以我將選擇器修改成class name，在製作相反狀態的組件，讓js去替換。 -->
 
+<!-- 另一種方法將要修改的屬性拉出來，再利用js做replace，我認爲這樣可讀性會差一些，在屬性沒有大量重複的地方我認為可以做，像是submit button屬性差很多就不適合，上面checked-column與uncheck-column差異不大就可以用這種方式，但我想要統一風格，所以全部使用製作相反狀態的組件，讓js去替換。-->
